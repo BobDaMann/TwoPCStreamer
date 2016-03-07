@@ -1,0 +1,13 @@
+﻿include mixins
+doctype html
+html
+    include ./head.jade 
+    body
+        include ./navbar.jade
+        block content
+                .container
+                    div.col-md-12
+                        h3  Encoder Settings
+                        +displayEncoderSettings(encoderSettings)
+                        
+         

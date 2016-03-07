@@ -1,0 +1,8 @@
+﻿{
+  "NginxPushToThirdPartyConfiguration": {
+    "ApplicationName": "broadcast",
+    "StreamKey": "inputStreamKeyMeow",
+    "AppPath": "app",
+    "BaseURI": "rtmp://twitch.tv"
+  }
+}

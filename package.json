@@ -1,0 +1,20 @@
+{
+  "name": "ExpressApp1",
+  "version": "0.0.0",
+  "description": "ExpressApp1",
+  "main": "app.js",
+  "author": {
+    "name": "TheCreator",
+    "email": "fuckyou@fuckyou.com"
+  },
+  "dependencies": {
+    "body-parser": "^1.15.0",
+    "bootstrap": "^3.3.6",
+    "clappr": "^0.2.38",
+    "express": "3.4.4",
+    "jade": "*",
+    "jquery": "^2.2.1",
+    "stylus": "*",
+    "xml2js": "*"
+  }
+}

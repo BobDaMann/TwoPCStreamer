@@ -1,0 +1,125 @@
+﻿mixin displayThirdSetting(thirdPartySettings)
+    table.table.table-striped
+        tr
+            th Name
+            th RTMP Output
+            th Options        
+        -if(thirdPartySettings!=null)
+                each thirdPartySetting, t in thirdPartySettings           
+                    +CreateFormRowThird(t,thirdPartySetting)     
+                              
+                tr
+                    td
+                        a(href='thirdpartysettings/Add' , class='btn btn-primary') Add
+                    td
+                    td 
+                        block
+
+
+mixin CreateFormRowThird(FormParentID,ThirdParty)
+    form(name="settingsForm#{FormParentID}", action='thirdpartysettings/edit?ID=#{FormParentID}'   method="post")
+        tr
+            td
+                +CreateFormItemForTable(FormParentID,"Name", ThirdParty.Name)   
+            td
+                +CreateFormItemForTable(FormParentID,"RemoteRTMPURL", ThirdParty.RemoteRTMPURL)
+            td
+                +formButton("settings"+FormParentID, "Save","btn-success")
+                block         
+        
+    
+
+mixin textFormItem(FormItemID,FormItemDisplay,Value)
+  div.form-group
+    label(for='#{FormItemID}',class='control-label col-sm-2')  #{FormItemDisplay}
+    div.col-sm-10
+        input(type='text',id='#{FormItemID}' name='#{FormItemDisplay}' class='form-control')
+        block
+
+mixin formButton(FormItemID,FormItemDisplay,ButtonClass)
+    div.form-group
+        input(type="submit", value='#{FormItemDisplay}', id='#{FormItemID}',  class='btn #{ButtonClass}')
+        block
+
+mixin DeleteLink(encoderSettingID)
+    td      
+        a(href='encoderSettings/delete?ID=#{encoderSettingID}' , class='btn btn-danger') Delete
+        block
+
+mixin AddNewRow()
+    block
+
+mixin CreateFormItemForTable(FormParentID, FormItemName, Value)  
+    input(type='text',id='#{FormItemID}' name='#{FormItemName}' value='#{Value}' class='form-control')
+    block
+    
+
+mixin CreateFormRowEncoder(FormParentID,encoderSetting)   
+    form(name="settingsForm#{FormParentID}", action='encoderSettings/edit?ID=#{FormParentID}'   method="post")
+        tr                           
+            td                         
+                +CreateFormItemForTable(FormParentID,"Bitrate",encoderSetting.Bitrate)
+            td 
+                +CreateFormItemForTable(FormParentID,"OutputResolution",encoderSetting.OutputResolution)                  
+            td 
+                +CreateFormItemForTable(FormParentID,"Framerate",encoderSetting.Framerate)                
+            td 
+                +selectListPreset(FormParentID,"Preset",encoderSetting.Preset)
+            td
+                +formButton("settings"+FormParentID, "Save","btn-success")         
+                +DeleteLink(FormParentID)
+      
+        block
+
+mixin displayEncoderSettings(encoderSettings)
+ table.table.table-striped
+    tr
+        th Bitrate
+        th Output Resolution
+        th Framerate
+        th X264 Preset
+        th Options
+        th
+    -if(encoderSettings!=null)
+         each encoderSetting, e in encoderSettings           
+                +CreateFormRowEncoder(e,encoderSetting)
+            tr
+                td
+                    a(href='encoderSettings/Add' , class='btn btn-primary') Add 
+                    block
+                
+       
+
+mixin AddNewEncoderBlock()
+  -if(encoderSettings!=null)
+        each encoderSetting, e in encoderSettings
+            div
+    +textFormItem('Bitrate','Bitrate')
+    +textFormItem('OutputResolution','Output Resolution')
+    +textFormItem('Framerate','Framerate')
+    +selectListPreset('Preset','Preset')
+    block
+
+mixin OptionHelper(OptionName,SelectedValue)
+    if SelectedValue == OptionName
+        option(value="#{OptionName}" selected) #{OptionName} 
+    else
+        option(value="#{OptionName}") #{OptionName} 
+        block
+
+mixin selectListPreset(FormItemID,FormItemDisplay,Value)
+    
+    select(id='#{FormItemID}' name='#{FormItemDisplay}', class='form-control', selected='#{Value}')
+        +OptionHelper("ultrafast",Value)
+        +OptionHelper("superfast",Value)
+        +OptionHelper("veryfast",Value)
+        +OptionHelper("faster",Value) 
+        +OptionHelper("fast",Value) 
+        +OptionHelper("medium",Value)
+        +OptionHelper("slow",Value) 
+        +OptionHelper("slower",Value)
+        +OptionHelper("veryslow",Value)
+        
+        block
+
+        

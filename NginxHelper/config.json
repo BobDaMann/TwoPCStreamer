@@ -1,0 +1,14 @@
+﻿
+
+{
+  "rootDirectory": "",
+  "FFMPEGOptionsFileName": "FFMPEGOptions.json",
+  "inputSource": "rtmp://",
+  "serverIP": "",
+  "rtmpPort": 1935,
+  "nginxInputAppName": "obsinput",
+  "nginxInputURIStem": "sourcestream"
+
+
+
+}

@@ -1,0 +1,169 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Restreamer">
+    <meta name="author" content="datarhei">
+    <title>Restreamer</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+
+    <script src="https://code.jquery.com/jquery-2.2.0.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clappr/0.2.35/clappr.js"></script>
+    <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.0/css/bootstrap-toggle.min.css" rel="stylesheet">
+    <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.0/js/bootstrap-toggle.min.js"></script>
+
+
+
+</head>
+<!--
+  (Player.HTML)
+2) Preview Page
+    - Preview
+        Un-encoded Stream
+        Re-encoded Stream
+    - Toggle Live (Push to Destination)
+
+     -->
+<body style="margin:0px;">
+    <nav class="navbar navbar-default">
+        <div class="container-fluid">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+              
+            </div>
+
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav">
+                    <li class="active"><a href="#">Preview <span class="sr-only">(current)</span></a></li>
+                    <li><a href="#">Encoding Options <span class="sr-only">(current)</span></a></li>
+                    <li><a href="#"></a></li>
+
+                </ul>
+            </div><!-- /.navbar-collapse -->
+        </div><!-- /.container-fluid -->
+    </nav>
+    <div style="background-color:white;" class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <form class="form-horizontal" >
+                    <h4>OBS Settings</h4>
+
+                    <div class="form-group">
+                        <label for="OBSOutputURL" class="col-sm-2 control-label">OBS Output URL</label>
+
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="OBSOutputURL" value="test" disabled>
+                        </div>
+                    </div>
+                </form>
+
+                <form class="form-horizontal" action="/FFMPEGOptions" method="post">
+                    <h4>Encoder Quality Settings</h4>
+
+                    <div class="form-group">
+                        <label for="RemoteRTMP" class="col-sm-2 control-label">Remote RTMP</label>
+
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="RemoteRTMP" name="RemoteRTMP">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="Bitrate" class="col-sm-2 control-label">Bitrate</label>
+
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="Bitrate" name="Bitrate">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label" for="OutputResolution">Output Resolution</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" name="OutputResolution" id="OutputResolution" placeholder="1280x720">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label" for="Framerate">Frame Rate</label>
+                        <div class="col-sm-10">
+                            <input type="number" class="form-control" id="Framerate" name="Framerate" placeholder="30">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label" for="Preset">Preset</label>
+                        <div class="col-sm-10">
+
+
+                            <select name="Preset" class="form-control">
+                                <option>ultrafast</option>
+                                <option>
+                                    superfast
+                                </option>
+                                <option>
+                                    veryfast
+                                </option>
+                                <option>
+                                    faster
+                                </option>
+                                <option>
+                                    fast
+                                </option>
+                                <option>
+                                    medium
+                                </option>
+                                <option>
+                                    slow
+                                </option>
+                                <option>
+                                    slower
+                                </option>
+                                <option>
+                                    veryslow
+                                </option>
+                                <option>
+                                    placebo
+                                </option>
+                            </select>
+
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-default">Submit</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
+<!--
+    <div class="row">
+        <div>
+            <div class="embed-responsive embed-responsive-16by9">
+                <div id="player" class="embed-responsive-item"></div>
+            </div>
+            <script>
+                var player = new Clappr.Player({
+                    source: "http://" + window.location.hostname + ":" + window.location.port + "/hls/live.stream.m3u8",
+                    parentId: "#player",
+                    baseUrl: '/libs/clappr/dist/',
+                    poster: "images/live.jpg",
+                    mediacontrol: {seekbar: "#3daa48", buttons: "#3daa48"},
+                    height: "100%",
+                    width: "100%"
+                });
+            </script>
+        </div>
+    </div>
+    -->

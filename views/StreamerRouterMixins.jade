@@ -1,0 +1,73 @@
+﻿mixin OptionHelper(OptionName,SelectedValue)
+    if SelectedValue == OptionName
+        option(value="#{OptionName}" selected) #{OptionName} 
+    else
+        option(value="#{OptionName}") #{OptionName} 
+        block
+mixin formButton(FormItemID,FormItemDisplay,ButtonClass)
+        input(type="submit", value='#{FormItemDisplay}', id='#{FormItemID}',  class='btn #{ButtonClass}')
+        block
+
+mixin DisplayOutpServicesWithCheckBoxes(AvaiableOutputServices)  
+   each AvaiableOutputService, a in AvaiableOutputServices
+          input(type='checkbox',name='#{AvaiableOutputService.Name}')
+          label #{AvaiableOutputService.Name}
+          br
+          block
+             
+mixin DisplayOuputStream(OutputStream)       
+    input(type='text', name='#{OutputStream}' class='form-control' disabled value="#{OutputStream}") 
+
+mixin DisplayInputStream(InputStream,ID,AvaiableInputs)
+    -if(ID == 0) 
+        input(type='text', name='#{InputStream}' class='form-control' disabled value="#{InputStream}")
+    -else
+        +AvailableOutputStreamList(AvaiableInputs)
+
+mixin DisplayDeleteButton(ID)
+    -if(ID != 0)
+        a(href='streamrouter/Delete?ID=#{ID}' , class='btn btn-danger')  Delete
+
+mixin AvailableOutputStreamList(InputStreams)
+    select(id='InputStream' name='InputStream', class='form-control')
+            each InputStream, e in InputStreams
+                +OptionHelper(InputStream)
+     
+      
+       
+mixin DisplayInputOutTable(ConfiguredInputOutputs,AvailableEncoders,AvaiableInputs)
+    form(name="settingsForm", action='streamrouter/Update'   method="post")                 
+        each ConfiguredInputOuput, c in ConfiguredInputOutputs
+            tr       
+                td     
+                    +DisplayInputStream(ConfiguredInputOutputs.InputStream,c,AvaiableInputs)
+                td          
+                    +DisplayAndSelectEncoderSettingList(AvailableEncoders,ConfiguredInputOuput.ID)
+                td               
+                    +DisplayOuputStream(ConfiguredInputOuput.OutputStream)
+                td
+                   +DisplayDeleteButton(c)
+        tr
+            td        
+                +formButton(1,"Save","btn-success")         
+                a(href='streamrouter/Add' , class='btn btn-primary') Add Encoder             
+                
+ 
+mixin DisplayAndSelectEncoderSettingList(avail,SelectedEncoderID)
+        select(id='EncoderSettings' name='EncoderSettings', class='form-control')
+            each availableEncoder, e in avail
+                +OptionHelper(availableEncoder.Bitrate + "_" + availableEncoder.OutputResolution + "_" +   availableEncoder.Framerate,SelectedEncoderID)
+ 
+mixin DisplayOutputServices(AvailableOuputs,AvailableOutputs)
+    each AvailableOuput, e in AvailableOuputs
+        tr
+            td 
+                p #{AvailableOuput}
+            td 
+                +DisplayOutpServicesWithCheckBoxes(AvailableOutputs)
+
+
+   
+                                
+
+           

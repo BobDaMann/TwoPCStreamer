@@ -1,0 +1,28 @@
+﻿include StreamerRouterMixins
+doctype html
+html
+    include ./head.jade 
+    title   
+body
+        include ./navbar.jade
+        block content
+            .container
+                 table.table.table-striped.col-md-12
+                    tr
+                        th.col-md-4 Input Stream
+                        th.col-md-3 Encoder
+                        th.col-md-3 Ouput Stream
+                        th.col-md-2 Options
+                        +DisplayInputOutTable(ConfiguredInputOutputs,AvailableEncoders,AvaiableInputs)
+            .container
+                table.table.table-striped.col-md-12                   
+                    tr
+                        th.col-md-8 Ouput Stream
+                        th.col-md-4 Final Destination(s)
+                    +DisplayOutputServices(AvaiableInputs,AvailableOutputs)
+                    tr
+                        td
+                        td
+                            a(href='streamrouter/Add' , class='btn btn-success') Save 
+
+ 

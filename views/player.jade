@@ -1,0 +1,29 @@
+﻿include mixins
+doctype html
+html
+  head
+        meta(name='viewport', content='width=device-width, initial-scale=1')
+        title= title
+        link(rel='stylesheet', href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css')
+        script(src='https://code.jquery.com/jquery-2.2.0.js')
+        script(src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js')
+        script(src='https://gitcdn.github.io/bootstrap-toggle/2.2.0/js/bootstrap-toggle.min.js')
+        link(rel='stylesheet', href='https://gitcdn.github.io/bootstrap-toggle/2.2.0/css/bootstrap-toggle.min.css')
+        script(src='https://cdn.jsdelivr.net/clappr/latest/clappr.min.js') 
+    body
+        include ./navbar.jade
+        block content
+            .container
+                .row
+                    .col-md-4
+                    .col-md-4                 
+                        #player
+                        script(type='text/javascript').     
+                            var player = new Clappr.Player({source: "http://your.video/here.mp4", parentId: "#player"})
+                    .col-md-4
+                .row
+                    .col-md-4
+                    .col-md-2
+                         select(id='PreviewSources' name='PreviewSources', class='form-control')
+                                option() 3000k_1280x720_30
+                                option() SourceStream
