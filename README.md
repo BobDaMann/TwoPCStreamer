@@ -17,6 +17,7 @@ Let me know if any of you guys would be interested in using it! (Free obviously)
 #What the hell are you on about?
 	http://www.helping-squad.com/two-pc-streaming-or-recording-without-a-capturecard/
 #What are the planned features?
+
 First Release
 +	Change Bitrate, Output Resolution, Framerate, Quality Preset
 +	Preview the Encoded Stream before going Live
@@ -24,7 +25,8 @@ First Release
 +	Encode Multiple streams (EG Twitch would could be encoded @ 3000Kbps and Youtube could be encoded @ 5000Kbps)
 +	View NGINX Error Logs
 +	View NGINX Stream Information
-#Future
+
+**Future**
 +	Manage Recording Options
 Suggestions Welcome
 #Technical Stuff
