@@ -1,11 +1,12 @@
-﻿Hey Folks,
+﻿
+I've been live coding this a few times per week, feel free to drop in  : http://www.twitch.tv/bobdamann
+
 
 I am almost done writing a UI to make streaming using two PCs a little easier. I am considering releasing it for others to use.
 
 Would you be interested in something that simplifies the setup process for streaming with two PCs and reduces the complexity of configuring your streaming PC?
 
-Let me know if any of you guys would be interested in using it! (Free obviously)
-(Screen shots added: http://imgur.com/a/vw2V7 )
+Screen shots added: http://imgur.com/a/vw2V7 
 
 
 **What are you building?**
