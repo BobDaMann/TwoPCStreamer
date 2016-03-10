@@ -12,6 +12,8 @@ var FFMPEGCommand =  {
 }
 
 
+ 
+
 exports.GetFFMPEGCommandFromOptions = function () {
     var blah = streamManage.ReadFile("C:\\nodeTest\\FFMPEGOptions.json");
     console.log(blah);   

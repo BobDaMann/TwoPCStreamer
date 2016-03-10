@@ -62,6 +62,7 @@ var EncoderSettingsHelper = {
 };
 
 exports.EncoderSettingsHelper = EncoderSettingsHelper;
+
 exports.GetEncoderSettings = function (req, res){
     
     var currentSettings = EncoderSettingsHelper.GetEncoderSettings();

@@ -1,5 +1,5 @@
 ﻿
-
+//TODO : Make EncoderSettingsID
 var InputOutputConfiguration = {
     FileNameOnDisk  : "InputOutputConfiguration.json",
     DefaultEncodingControllerName : "EncodingController",
@@ -9,7 +9,7 @@ var InputOutputConfiguration = {
         ID : 0,
         InputStream : "",
         OutputStream : "",
-        EncoderSettings : ""
+        EncoderSettings : ""       
     },
     GetAllPossibleInputStreams : function (){
         var currentSettings = this.GetInputOutputConfiguration();
@@ -119,6 +119,8 @@ var OutputToThirdPartyServices = {
 
 
 };
+
+exports.InputOutputConfig = InputOutputConfiguration;
 
 exports.GetAvailableInputsOutputsAndEncoders = function (req, res) {
 

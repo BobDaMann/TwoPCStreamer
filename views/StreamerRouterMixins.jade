@@ -1,8 +1,8 @@
-﻿mixin OptionHelper(OptionName,SelectedValue)
+﻿mixin OptionHelper(OptionID,OptionName,SelectedValue)
     if SelectedValue == OptionName
-        option(value="#{OptionName}" selected) #{OptionName} 
+        option(value="#{OptionID}" selected) #{OptionName} 
     else
-        option(value="#{OptionName}") #{OptionName} 
+        option(value="#{OptionID}") #{OptionName} 
         block
 mixin formButton(FormItemID,FormItemDisplay,ButtonClass)
         input(type="submit", value='#{FormItemDisplay}', id='#{FormItemID}',  class='btn #{ButtonClass}')
@@ -18,20 +18,20 @@ mixin DisplayOutpServicesWithCheckBoxes(AvaiableOutputServices)
 mixin DisplayOuputStream(OutputStream)       
     input(type='text', name='#{OutputStream}' class='form-control' disabled value="#{OutputStream}") 
 
-mixin DisplayInputStream(InputStream,ID,AvaiableInputs)
+mixin DisplayInputStream(InputStream,FormID,AvaiableInputs)
     -if(ID == 0) 
-        input(type='text', name='#{InputStream}' class='form-control' disabled value="#{InputStream}")
+        input(type='text', name='#{InputStream}_#{FormID}' class='form-control' disabled value="#{InputStream}")
     -else
-        +AvailableOutputStreamList(AvaiableInputs)
+        +AvailableOutputStreamList(FormID,AvaiableInputs)
 
 mixin DisplayDeleteButton(ID)
     -if(ID != 0)
         a(href='streamrouter/Delete?ID=#{ID}' , class='btn btn-danger')  Delete
 
-mixin AvailableOutputStreamList(InputStreams)
-    select(id='InputStream' name='InputStream', class='form-control')
+mixin AvailableOutputStreamList(FormID,InputStreams)
+    select(id='InputStream' name='InputStream_#{FormID}', class='form-control')
             each InputStream, e in InputStreams
-                +OptionHelper(InputStream)
+                +OptionHelper(e,InputStream)
      
       
        
@@ -42,7 +42,7 @@ mixin DisplayInputOutTable(ConfiguredInputOutputs,AvailableEncoders,AvaiableInpu
                 td     
                     +DisplayInputStream(ConfiguredInputOutputs.InputStream,c,AvaiableInputs)
                 td          
-                    +DisplayAndSelectEncoderSettingList(AvailableEncoders,ConfiguredInputOuput.ID)
+                    +DisplayAndSelectEncoderSettingList(c,AvailableEncoders,ConfiguredInputOuput.ID)
                 td               
                     +DisplayOuputStream(ConfiguredInputOuput.OutputStream)
                 td
@@ -53,10 +53,10 @@ mixin DisplayInputOutTable(ConfiguredInputOutputs,AvailableEncoders,AvaiableInpu
                 a(href='streamrouter/Add' , class='btn btn-primary') Add Encoder             
                 
  
-mixin DisplayAndSelectEncoderSettingList(avail,SelectedEncoderID)
-        select(id='EncoderSettings' name='EncoderSettings', class='form-control')
+mixin DisplayAndSelectEncoderSettingList(FormID,avail,SelectedEncoderID)
+        select(id='EncoderSettings' name='EncoderSettings_#{FormID}', class='form-control')
             each availableEncoder, e in avail
-                +OptionHelper(availableEncoder.Bitrate + "_" + availableEncoder.OutputResolution + "_" +   availableEncoder.Framerate,SelectedEncoderID)
+                +OptionHelper(availableEncoder.ID,availableEncoder.Bitrate + "_" + availableEncoder.OutputResolution + "_" +   availableEncoder.Framerate,SelectedEncoderID)
  
 mixin DisplayOutputServices(AvailableOuputs,AvailableOutputs)
     each AvailableOuput, e in AvailableOuputs
