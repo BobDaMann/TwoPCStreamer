@@ -12,20 +12,27 @@
 //TODO : On FFMPEG Post, restart NGINX to use the new configuration
 //TODO : On Start, ensure that hte correct FFMPEG file is being read for configuration
 //TODO : Update to read/display StreamStats.xml provided via NGINX
-var http = require('http');
-var path = require('path');
 var express = require('express');
 var routes = require('./routes');
 var user = require('./routes/user');
+var serverip = require('./routes/rtmp');
+
+var http = require('http');
+var path = require('path');
 var fs = require('fs');
 var xml2js = require('xml2js');
-
-var serverip = require('./routes/rtmp');
 var configInfo = require("./NginxHelper/config.json");
+
+
 encoderSettingsController = require('./routes/EncoderSetting');
 thirdPartyController = require('./routes/3rdPartySettings');
 streamManage = require('./NginxHelper/streamManage');
+
+//var dumb = require("./NginxHelper/FFMPEGOptionsToCommand");
+
+
 var streamRouterController = require('./routes/StreamRouterController');
+var nginxController = require('./NginxHelper/NGINXConfiguration');
 
 var app = express();
 
@@ -59,12 +66,12 @@ http.createServer(app).listen(app.get('port'), function () {
     console.log('Express server listening on port ' + app.get('port'));
 });
 
+app.get('/inputConfigHTML', function (request, resposne) {
+    resposne.sendfile('views/InputConfiguration.html');
+});
 
 
-/*
- *  Route Decleration
- * 
- * */
+
 app.get('/encoderSettings', encoderSettingsController.GetEncoderSettings);
 
 app.get('/encoderSettings/Add', encoderSettingsController.Add);
@@ -85,15 +92,65 @@ app.get('/streamrouter', streamRouterController.GetAvailableInputsOutputsAndEnco
 
 app.get('/streamrouter/Add', streamRouterController.Add);
 app.post('/streamrouter/Update', streamRouterController.Update);
+app.post('/streamrouter/UpdateThird', streamRouterController.UpdateThird);
+
 app.get('/streamrouter/Delete', streamRouterController.Delete);
 
 
 app.post('/streamManage', streamManage.setStreamStatus);
 app.get('/streamManage', streamManage.streamManage);
 
+app.get('/FFMPEGOptions', function (request, response) {
+    response.json(JSON.parse(streamManage.ReadFile(configInfo.FFMPEGOptionsFileName)));
+});
+
+app.post('/FFMPEGOptions', function (request, response) {
+    console.log("Body Below");
+    console.log(request.body);
+    var newFFMPEGOptions = {
+        Bitrate : request.body.Bitrate,
+        OutputResolution : request.body.OutputResolution,
+        Preset : request.body.Preset,
+        Framerate : request.body.Framerate,
+        Streamkey : request.body.Streamkey,
+        RTMP : request.body.RTMP
+    };
+    streamManage.WriteFile(configInfo.FFMPEGOptionsFileName, newFFMPEGOptions, true);
+    console.log(newFFMPEGOptions);
+    //quotes.push(newQuote);
+    response.json(newFFMPEGOptions);
+});
 
 
+app.post('/ThirdPartyConfigurations', function (request, response) {
+    
+    console.log(request.body);
+    
+    var newThirdPartyConfiguration = {
+        StreamKey : request.body.StreamKey,
+        RemoteRTMPURL : request.body.RemoteRTMPURL
+    }
+    fileHelper.WriteFile("ThirdPartyConfigurations.json", newThirdPartyConfiguration);
+    response.json(newThirdPartyConfiguration);
+   
+});
 
+
+app.post('/ThirdPartyConfigurations', function (request, response) {
+    
+    console.log(request.body);
+    
+    var newThirdPartyConfiguration = {
+        StreamKey : request.body.StreamKey,
+        RemoteRTMPURL : request.body.RemoteRTMPURL
+    }
+    fileHelper.WriteFile("ThirdPartyConfigurations.json", newThirdPartyConfiguration);
+    response.json(newThirdPartyConfiguration);
+   
+});
+
+
+nginxController.NginxHelper.FakeItForNow(streamRouterController.InputOutputConfigurationHelper.GetInputOutputConfiguration());
 
 
 
@@ -204,84 +261,30 @@ fileHelper.WriteFile("NGINX.conf",n.GetNginxFullConfig(), false);
 
 "application obsinput {
  live on;
-exec ffmpeg 
- * -i rtmp://localhost:1935/obsinput/sourcestream 
- * -vcodec libx264
- *  -preset medium 
- *  -b:v 3000k -maxrate 3000k -bufsize 3000k 
- *  -s  1280x720 
- *  -r 40 
- *  -acodec copy 
- *  -f flv 
- *  rtmp://localhost:1935/encoded/localpreview
+exec ffmpeg -i rtmp://localhost:1935/obsinput/sourcestream -vcodec libx264 -preset medium -b:v 3000k -maxrate 3000k -bufsize 3000k -s  1280x720 -r 40 -acodec copy -f flv rtmp://localhost:1935/encoded/localpreview
 }
 application encoded {
- live on;
-push  rtmp://localhost:1935/broadcastcontroller/off live=1;
+    live on;
+    exec ffmpeg -i rtmp://localhost:1935/obsinput/sourcestream 
+   flv rtmp://localhost:1935/encoded/localpreview
+    push  rtmp://localhost:1935/broadcastcontroller/off live=1;
+    push  rtmp://localhost:1935/broadcastcontroller/off_LocalStreamName name=LocalStreamName live=1;
+    push  rtmp://localhost:1935/broadcastcontroller/off_LocalStreamName name=LocalStreamName2 live=1;
+ 
+    
 }
 application broadcastcontroller {
- live on;
-push rtmp://localhost:1935/broadcast/golive name=on live=1;
- * rtmp://localhost:1935/broadcast/on
+    live on;
+    push rtmp://localhost:1935/broadcast/golive_LocalStreamName1 name=on_LocalStreamName1 live=1;
+    push rtmp://localhost:1935/broadcast/golive_LocalStreamName2 name=on_LocalStreamName2 live=1;
 }
 application broadcast {
  live on;
-push rtmp://rtmp://twitch.tv app=app playPath=inputStreamKeyMeow live=1 name=golive;
+    push rtmp://ServiceURL1 live=1 name=golive_LocalStreamName1;
+    push rtmp://ServiceURL2 live=1 name=golive_LocalStreamName2;
+    push rtmp://ServiceURL3 live=1 name=golive_LocalStreamName2;
+    
 }"
-
- * 
- * 
- * app.get('/FFMPEGOptions', function (request, response) {
-    response.json(JSON.parse(streamManage.ReadFile(configInfo.FFMPEGOptionsFileName)));
-});
-
-app.post('/FFMPEGOptions', function (request, response) {
-    console.log("Body Below");
-    console.log(request.body);
-    var newFFMPEGOptions = {
-        Bitrate : request.body.Bitrate,
-        OutputResolution : request.body.OutputResolution,
-        Preset : request.body.Preset,
-        Framerate : request.body.Framerate,
-        Streamkey : request.body.Streamkey,
-        RTMP : request.body.RTMP
-    };
-    streamManage.WriteFile(configInfo.FFMPEGOptionsFileName, newFFMPEGOptions, true);
-    console.log(newFFMPEGOptions);
-    //quotes.push(newQuote);
-    response.json(newFFMPEGOptions);
-});
-
-
-app.post('/ThirdPartyConfigurations', function (request, response) {
-
-    console.log(request.body);
-
-    var newThirdPartyConfiguration = {
-        StreamKey : request.body.StreamKey,
-        RemoteRTMPURL : request.body.RemoteRTMPURL 
-    }
-    fileHelper.WriteFile("ThirdPartyConfigurations.json", newThirdPartyConfiguration);
-    response.json(newThirdPartyConfiguration);
-   
-});
-
-
-app.post('/ThirdPartyConfigurations', function (request, response) {
-    
-    console.log(request.body);
-    
-    var newThirdPartyConfiguration = {
-        StreamKey : request.body.StreamKey,
-        RemoteRTMPURL : request.body.RemoteRTMPURL
-    }
-    fileHelper.WriteFile("ThirdPartyConfigurations.json", newThirdPartyConfiguration);
-    response.json(newThirdPartyConfiguration);
-   
-});
-app.get('/inputConfigHTML', function (request, resposne) {
-    resposne.sendfile('views/InputConfiguration.html');   
-});
 
 
 

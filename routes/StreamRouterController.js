@@ -1,6 +1,35 @@
 ﻿
-//TODO : Make EncoderSettingsID
-var InputOutputConfiguration = {
+var StreamRouterHelper = {
+    TemplateObject : {
+        AvailableEncoders : {},
+        AvaiableInputs : {},
+        AvailableOutputs : {},
+        ConfiguredInputOutputs : []
+    },
+    
+    GetAvaiableEncoders : function () {
+        var blah = encoderSettingsController.EncoderSettingsHelper.GetEncoderSettings();
+        return blah.encoderSettings;
+    },
+    GetAvailableInputs : function () {
+        var blah = InputOutputConfigurationHelper.GetAllPossibleInputStreams();
+        return blah;
+    },
+    GetAvailableOutputs : function () {
+        var blah = thirdPartyController.ThirdPartyHelper.GetThirdParty();
+        return blah;
+    },
+    GetAllAvailable : function () {
+        
+        this.TemplateObject.ConfiguredInputOutputs = InputOutputConfigurationHelper.GetInputOutputConfiguration();
+        this.TemplateObject.AvailableEncoders = this.GetAvaiableEncoders();
+        this.TemplateObject.AvaiableInputs = this.GetAvailableInputs();
+        this.TemplateObject.AvailableOutputs = this.GetAvailableOutputs().ThirdParty;
+        return this.TemplateObject;
+    }
+
+}
+var InputOutputConfigurationHelper = {
     FileNameOnDisk  : "InputOutputConfiguration.json",
     DefaultEncodingControllerName : "EncodingController",
     DefaultNGINXServerInfo : "rtmp://localhost:1935/",
@@ -9,16 +38,17 @@ var InputOutputConfiguration = {
         ID : 0,
         InputStream : "",
         OutputStream : "",
-        EncoderSettings : ""       
+        EncoderSettings : {},
+        ThirdPartySettings : []
     },
-    GetAllPossibleInputStreams : function (){
+    GetAllPossibleInputStreams : function () {
         var currentSettings = this.GetInputOutputConfiguration();
         var AllInputStreamSources = [];
         AllInputStreamSources.push(this.DefaultSourceInput);
         currentSettings.forEach(function (element, index) {
             AllInputStreamSources.push(element.OutputStream);
         });
-
+        
         return AllInputStreamSources;
     },      
     AddInputOuputConfiguration : function () {
@@ -40,7 +70,8 @@ var InputOutputConfiguration = {
         }
         catch (e) {
             currentSettings = [];
-            this.EncoderInputOutputConfiguration.ID = currentSettings.length;
+            this.EncoderInputOutputConfiguration.ID = 0;
+            this.EncoderInputOutputConfiguration.InputStream = this.DefaultSourceInput;
             currentSettings.push(this.EncoderInputOutputConfiguration);
             this.WriteToDisk(currentSettings);
             
@@ -54,64 +85,89 @@ var InputOutputConfiguration = {
         currentSettings.splice(ID, 1);
         this.WriteToDisk(currentSettings);
     },
-    UpdateInputOutputConfiguration : function (ID, IntputOutConfigItem) {
-      
+    UpdateInputOutputConfiguration : function (parsedInputSettings) {
+        var EncoderSettingsIDs = parsedInputSettings.EncoderSettings;
+        var InputStreams = parsedInputSettings.InputStreams;
         var currentSettings = this.GetInputOutputConfiguration();
-        IntputOutConfigItem.OutputStream = this.BuildOutputStreamRTMPURL(IntputOutConfigItem.EncoderSettings);
-        currentSettings[ID] = IntputOutConfigItem;     
+        
+        for (var e = 0; e < EncoderSettingsIDs.length; e++) {
+            if (currentSettings[e] == null) {
+                var temp = {};
+                currentSettings.push(temp);
+            }
+            
+            var ID = EncoderSettingsIDs[e];
+            
+            var singleEncoderSetting = encoderSettingsController.EncoderSettingsHelper.GetEncoderSettingsByID(ID);
+            
+            currentSettings[e].ID = e
+            currentSettings[e].InputStream = InputStreams[e];
+            currentSettings[e].OutputStream = this.BuildOutputStreamRTMPURL(singleEncoderSetting);
+            currentSettings[e].EncoderSettings = singleEncoderSetting;
+           
+        }
+        
+        
+        this.WriteToDisk(currentSettings);
+    },
+    UpdateInputOuputConfigurationThirdParty : function (ThirdPartySettings) {
+        var currentSettings = this.GetInputOutputConfiguration();
+        var tempThirdParty = [];
+        console.log(ThirdPartySettings);
+        for (var c = 0; c < currentSettings.length; c++) {
+            currentSettings[c].ThirdPartySettings = [];
+            for (var t = 0; t < ThirdPartySettings.length; t++) {
+                if (currentSettings[c].OutputStream == ThirdPartySettings[t].OutputStream) {
+                    
+                    tempThirdParty = thirdPartyController.ThirdPartyHelper.GetThirdPartyObjectByName(ThirdPartySettings[t].ServiceName);
+                    
+                    currentSettings[c].ThirdPartySettings.push(tempThirdParty);
+                }
+            }
+        }
+        
         this.WriteToDisk(currentSettings);
     },
     WriteToDisk : function (InputConfigJSON) {
         streamManage.WriteFile(this.FileNameOnDisk, InputConfigJSON, true);
     },
-    ParseBody : function (requestBody, _ID) {
-        var parsedInputSettings = { ID : null };
+    ParseBodyThird : function (requestBody) {
         
-        if (_ID != null) {
-            parsedInputSettings.ID = _ID;
+        var keys = Object.keys(requestBody);
+        var ThirdPartyTemp = [];
+        
+        for (var key in requestBody) {
+            if (typeof (requestBody[key]) != "object") {
+                var serviceRegex = /(^[A-Za-z0-9]*)(?:_)(.*$)/g
+                var matches = serviceRegex.exec(key);
+                
+                var OutputStream = matches[2];
+                var ServiceName = matches[1];
+                ThirdPartyTemp.push({ ServiceName : ServiceName , OutputStream : OutputStream });
+             
+                
+            }
+          
+            
         }
         
-        parsedInputSettings.InputStream = requestBody.InputStream;
-        parsedInputSettings.OutputStream = requestBody.OutputStream;
+        return ThirdPartyTemp;
+    },
+    ParseBody : function (requestBody) {
+        var parsedInputSettings = {};
+        parsedInputSettings.InputStreams = requestBody.InputStream;
         parsedInputSettings.EncoderSettings = requestBody.EncoderSettings;
         
         return parsedInputSettings;
     },
-    BuildOutputStreamRTMPURL : function (EncodingSettings){
-        return this.DefaultNGINXServerInfo + this.DefaultEncodingControllerName + '/' + EncodingSettings;
+    
+    BuildOutputStreamRTMPURL : function (EncodingSettings) {
+        var outputString = EncodingSettings.Bitrate + "_" + EncodingSettings.OutputResolution + "_" + EncodingSettings.Framerate;
+        return this.DefaultNGINXServerInfo + this.DefaultEncodingControllerName + '/' + outputString;
     }
 }
 
-var StreamRouterHelper =  {    
-    TemplateObject : {
-        AvailableEncoders : {},
-        AvaiableInputs : {},
-        AvailableOutputs : {},
-        ConfiguredInputOutputs : []
-    },
 
-    GetAvaiableEncoders : function () {
-        var blah = encoderSettingsController.EncoderSettingsHelper.GetEncoderSettings();
-        return blah.encoderSettings;
-    },
-    GetAvailableInputs : function () {
-        var blah = InputOutputConfiguration.GetAllPossibleInputStreams();        
-        return blah;
-    },
-    GetAvailableOutputs : function (){
-        var blah = thirdPartyController.ThirdPartyHelper.GetThirdParty();
-        return blah;
-    },
-    GetAllAvailable : function (){
-        
-        this.TemplateObject.ConfiguredInputOutputs = InputOutputConfiguration.GetInputOutputConfiguration();
-        this.TemplateObject.AvailableEncoders = this.GetAvaiableEncoders();
-        this.TemplateObject.AvaiableInputs = this.GetAvailableInputs();
-        this.TemplateObject.AvailableOutputs = this.GetAvailableOutputs().ThirdParty;
-        return this.TemplateObject;
-    }      
-
-}
 
 
 var OutputToThirdPartyServices = {
@@ -120,31 +176,35 @@ var OutputToThirdPartyServices = {
 
 };
 
-exports.InputOutputConfig = InputOutputConfiguration;
-
 exports.GetAvailableInputsOutputsAndEncoders = function (req, res) {
-
-    var avaiableStuff = StreamRouterHelper.GetAllAvailable();    
+    
+    var avaiableStuff = StreamRouterHelper.GetAllAvailable();
     res.render('StreamRouteManagement', avaiableStuff);
 
 }
 
-exports.Add = function (req, res){
+exports.Add = function (req, res) {
     InputOutputConfiguration.AddInputOuputConfiguration();
     res.redirect("/streamrouter");
 }
 
-exports.Update = function (req, res){
-  
-    var ID = req.param('ID');
-    InputOutputConfiguration.UpdateInputOutputConfiguration(ID, InputOutputConfiguration.ParseBody(req.body, ID));
+exports.Update = function (req, res) {
+    
+    InputOutputConfiguration.UpdateInputOutputConfiguration(InputOutputConfiguration.ParseBody(req.body));
     res.redirect("/streamrouter");
 }
 
-exports.Delete = function (req, res){
+exports.UpdateThird = function (req, res) {
+    InputOutputConfiguration.UpdateInputOuputConfigurationThirdParty(InputOutputConfiguration.ParseBodyThird(req.body));
+    res.redirect("/streamrouter");
+}
 
+exports.Delete = function (req, res) {
+    
     var ID = req.param('ID');
     InputOutputConfiguration.DeleteInputOutputConfiguration(ID);
    
 
 }
+
+exports.InputOutputConfigurationHelper = InputOutputConfigurationHelper;

@@ -11,6 +11,18 @@ var EncoderSettingsHelper = {
         this.WriteToDisk(currentSettings);
         return currentSettings;
     },
+    GetEncoderSettingsByID : function (ID) {
+        var settings = this.GetEncoderSettings().encoderSettings;
+        var encoderSettingToReturn = {};
+        for (var s = 0; s < settings.length; s++) {
+            if (settings[s].ID == ID) {
+                encoderSettingToReturn = settings[s];
+                return encoderSettingToReturn;
+            }
+            console.log("s " + s);
+        }
+     
+    },
     GetEncoderSettings : function () {
         var currentSettings;
         try {
@@ -47,27 +59,26 @@ var EncoderSettingsHelper = {
     ParseBody : function (requestBody, _ID) {
         
         var parsedEncoderSettings = { ID : null };
-
+        
         if (_ID != null) {
             parsedEncoderSettings.ID = _ID;
         }
-
-        parsedEncoderSettings.Bitrate= requestBody.Bitrate;
+        
+        parsedEncoderSettings.Bitrate = requestBody.Bitrate;
         parsedEncoderSettings.Framerate = requestBody.Framerate;
         parsedEncoderSettings.OutputResolution = requestBody.OutputResolution;
         parsedEncoderSettings.Preset = requestBody.Preset;
-          
+        
         return parsedEncoderSettings;
     }
 };
 
 exports.EncoderSettingsHelper = EncoderSettingsHelper;
-
-exports.GetEncoderSettings = function (req, res){
+exports.GetEncoderSettings = function (req, res) {
     
     var currentSettings = EncoderSettingsHelper.GetEncoderSettings();
     
-    res.render('encodersettings',   currentSettings ); 
+    res.render('encodersettings', currentSettings);
 };
 
 exports.Add = function (req, res) {
@@ -89,7 +100,7 @@ exports.Delete = function (req, res) {
     res.redirect('/encoderSettings');
 };
 
-exports.TestWrite = function (req, res){  
+exports.TestWrite = function (req, res) {
     res.render('encodersettings', { title: 'Express' });
 }
 
