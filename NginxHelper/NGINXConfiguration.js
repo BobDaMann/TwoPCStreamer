@@ -1,10 +1,5 @@
 ﻿
-var NginxConfiguration = {
-    "NginxInputConfiguration": { "ApplicationName": "input" },
-    "NginxEncodedConfiguration": { "ApplicationName": "encodingcontroller" },
-    "NginxControllerConfiguration": { "ApplicationName": "broadcast" },
-    "NginxThirdPartyServiceConfiguration": []
-}
+
 
 var NginxPushToThirdPartyConfiguration = {
     "ApplicationName": "broadcast",
@@ -12,6 +7,79 @@ var NginxPushToThirdPartyConfiguration = {
     "AppPath": "app",
     "BaseURI": "rtmp://twitch.tv"
 }
+
+var broadcastOnOffNames = function (onName, offName, broadcastLiveName) {
+    this.onName = onName;
+    this.offName = offName;
+    this.broadcastLiveName = broadcastLiveName;
+    this.GetOnName = function () {
+        return this.onName;
+    }
+    this.GetOffName = function () {
+        return this.offName
+    }
+    this.GetBroadcastLiveName = function () {
+        return this.broadcastLiveName;
+    }
+}
+
+function ReturnNginxApplicationSection(NginxConfiguration) {
+    var result = "application " + NginxConfiguration.applicationName + " {\n live on;\n";    
+    for (var c = 0; c < NginxConfiguration.CommandList.length; c++) {
+        result += NginxConfiguration.CommandList[c] +"\n";
+    }
+    result += "}";
+    return result;
+            
+
+}
+
+
+var NginxConfiguration = function (ConfigJson) {
+    
+    var base = {
+        "NginxEncodedConfiguration": { "ApplicationName": "encodingcontroller" , "commands" : [] },
+        "NginxController": { "ApplicationName": "broadcastcontroller", "commands" : [] },
+        "NginxBroadcast": { "ApplicationName": "broadcast" , "commands" : [] }
+    };
+    base["NginxEncodedConfiguration"].commands = ConfigJson.FFMPEGCommandsList;
+    base["NginxController"].commands = ConfigJson.PushRelayList;
+    base["NginxController"].commands
+    base["NginxBroadcast"].commands = ConfigJson.LiveRelayList;
+      
+    return base;
+
+}
+
+
+
+var nginxConfigurationHelper = function (NginxConfigJson) {
+    
+    //Set the names to push/pull broacast, switching a stream from "local" to "broadcast"
+    //http://nginx-rtmp.blogspot.com/2014/01/redirecting-streams-in-version-111.html
+    var broadcastObject = new broadcastOnOffNames("on", "off", "golive");
+    this.onName = broadcastObject.GetOnName();
+    this.offName = broadcastObject.GetOffName();
+    this.broadcastLiveName = broadcastObject.GetBroadcastLiveName();
+    
+    this.nginxConfig = NginxConfigJson.NginxConfiguration;  
+    
+    
+    this.GetNginxEncodedConfiguration = function () {       
+        return ReturnNginxApplicationSection(this.nginxConfig.NginxEncodedConfiguration)
+    }
+    this.GetNNginxControllerConfiguration = function () {     
+        return ReturnNginxApplicationSection(this.nginxConfig.NginxController);
+    }
+    this.GetNginxBroadcastConfiguration = function () {     
+        return ReturnNginxApplicationSection(this.nginxConfig.NginxBroadcast);
+    }   
+    
+    this.GetNginxFullConfig = function () {
+        return this.GetNginxInputApplicationConfig() + "\n" + this.GetNginxEncodedApplicationConfig() + "\n" + this.GetNginxControllerConfiguration() + "\n";
+    }
+}
+
 
 
 var NginxHelper = {
@@ -49,38 +117,29 @@ var NginxHelper = {
    
     },
     GenerateNginxConfigCommands : function (InputOuputConfigurations) {
-        var ReturnObject = {};
-        
-        var PushRelayList = [];
-        var BroadcastRelayList = [];
-        var LiveRelayList = [];
-        var FFMPEGCommands = [];
+        var rObj = {
+            NginxEncoderCommandList : [],
+            NginxBroadcastControllerCommandList : [],
+            NginxBroadcastCommandList  : []
+        };
+
         for (var i = 0; i < InputOuputConfigurations.length; i++) {
             var InputOuput = InputOuputConfigurations[i];
             console.log(InputOuput);
             
-            FFMPEGCommands.push(this.GetFFMPEGCommandText(InputOuput.InputStream, InputOuput.EncoderSettings, InputOuput.OutputStream));
-            PushRelayList.push(this.GeneratePushRelay(InputOuput.EncoderSettings));
-            BroadcastRelayList.push(this.GenerateBroadcastRealy(InputOuput.EncoderSettings));
-            console.log("THIRD RIGHT BEFORE LOOP");
-            console.log(InputOuput.ThirdPartySettings[0]);
+            rObj.NginxEncoderCommandList.push(this.GetFFMPEGCommandText(InputOuput.InputStream, InputOuput.EncoderSettings, InputOuput.OutputStream));
+            rObj.NginxBroadcastControllerCommandList.push(this.GeneratePushRelay(InputOuput.EncoderSettings));
+            rObj.NginxBroadcastControllerCommandList.push(this.GenerateBroadcastRealy(InputOuput.EncoderSettings));          
             
-            this.GenerateLiveRelay(InputOuput.ThirdPartySettings, InputOuput.EncoderSettings, LiveRelayList);
+            rObj.NginxBroadcastCommandList = this.GenerateLiveRelay(InputOuput.ThirdPartySettings, InputOuput.EncoderSettings, rObj.NginxBroadcastCommandList);
            
            
         }
-        ReturnObject.PushRelayList = PushRelayList;
-        ReturnObject.BroadcastRelayList = PushRelayList;
-        ReturnObject.LiveRelayList = PushRelayList;
-        ReturnObject.FFMPEGCommandsList = FFMPEGCommands;
-        
-        console.log(ReturnObject);
+      
+        console.log(rObj);
         
         return ReturnObject;
 
-    },
-    GenerateEncodingCommand : function (InputOuputConfiguration) {
-        //GetFFMpegCommand
     },
     GeneratePushRelay : function (EncodingSetting) {
         var LocalStreamNameOff = this.GetOffKeyword() + this.GetEncodingShortHand(EncodingSetting);
@@ -108,9 +167,36 @@ var NginxHelper = {
     },
     GenerateRTMPLocalRelay : function (ApplicationName, StreamName, StreamToForward) {
         return "    push rtmp://localhost:1935/" + ApplicationName + "/" + StreamName + " name=" + StreamToForward + " live=1;";
-    }
+    },
+
 
 };
 
 
 exports.NginxHelper = NginxHelper;
+
+/*
+ * var nginxEncodedConfigurationHelper = function (applicationName, broadcastOffName) {
+    this.broadcastOffName = broadcastOffName;
+    this.GetControllerText = function () {
+        return "push  rtmp://localhost:1935/broadcastcontroller/" + this.broadcastOffName + " live=1;"
+    }
+}
+var nginxBroadcastControllerHelper = function (applicationName, nginxThirdPartyApplicationName, broadcastOnName, broadcastLiveName) {
+    this.bodyText = "push rtmp://localhost:1935/" + nginxThirdPartyApplicationName + "/" + broadcastLiveName + " name=" + broadcastOnName + " live=1;"
+    this.GetControllerText = function () {
+        return this.bodyText;
+    }
+}
+var nginxBroadcastToThirdPartyHelper = function (applicationName, broadcastLiveName, thirdPartyURL, appURL, streamKey) {
+    
+    // This isn't very clear but this is what the twitch configuration looks like
+    // Real URL == rtmp://live-cdg.twitch.tv/app/streamKey
+    // Nginx Version Of that
+    // rtmp://live-dfw.twitch.tv app=app playPath=streamKey live=1 name=go; 
+    this.bodyText = "push rtmp://" + thirdPartyURL + " app=" + appURL + " playPath=" + streamKey + " live=1 name=" + broadcastLiveName + ";";
+    this.GetControllerText = function () {
+        return this.bodyText;
+    }
+}
+ * */
