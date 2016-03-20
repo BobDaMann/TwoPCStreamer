@@ -7,6 +7,10 @@
     "name": "TheCreator",
     "email": "fuckyou@fuckyou.com"
   },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/BobDaMann/TwoPCStreamer.git"
+  },
   "dependencies": {
     "body-parser": "^1.15.0",
     "bootstrap": "^3.3.6",

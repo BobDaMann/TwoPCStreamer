@@ -24,9 +24,10 @@ var broadcastOnOffNames = function (onName, offName, broadcastLiveName) {
 }
 
 function ReturnNginxApplicationSection(NginxConfiguration) {
-    var result = "application " + NginxConfiguration.applicationName + " {\n live on;\n";    
-    for (var c = 0; c < NginxConfiguration.CommandList.length; c++) {
-        result += NginxConfiguration.CommandList[c] +"\n";
+    //console.log(NginxConfiguration);
+    var result = "application " + NginxConfiguration.ApplicationName + " {\n\tlive on;\n";    
+    for (var c = 0; c < NginxConfiguration.commands.length; c++) {
+        result += NginxConfiguration.commands[c] +"\n";
     }
     result += "}";
     return result;
@@ -36,16 +37,15 @@ function ReturnNginxApplicationSection(NginxConfiguration) {
 
 
 var NginxConfiguration = function (ConfigJson) {
-    
+    //console.log(ConfigJson);
     var base = {
         "NginxEncodedConfiguration": { "ApplicationName": "encodingcontroller" , "commands" : [] },
         "NginxController": { "ApplicationName": "broadcastcontroller", "commands" : [] },
         "NginxBroadcast": { "ApplicationName": "broadcast" , "commands" : [] }
     };
-    base["NginxEncodedConfiguration"].commands = ConfigJson.FFMPEGCommandsList;
-    base["NginxController"].commands = ConfigJson.PushRelayList;
-    base["NginxController"].commands
-    base["NginxBroadcast"].commands = ConfigJson.LiveRelayList;
+    base["NginxEncodedConfiguration"].commands = ConfigJson.NginxEncoderCommandList;
+    base["NginxController"].commands = ConfigJson.NginxBroadcastControllerCommandList;
+    base["NginxBroadcast"].commands = ConfigJson.NginxBroadcastCommandList;
       
     return base;
 
@@ -62,7 +62,7 @@ var nginxConfigurationHelper = function (NginxConfigJson) {
     this.offName = broadcastObject.GetOffName();
     this.broadcastLiveName = broadcastObject.GetBroadcastLiveName();
     
-    this.nginxConfig = NginxConfigJson.NginxConfiguration;  
+    this.nginxConfig = NginxConfigJson;  
     
     
     this.GetNginxEncodedConfiguration = function () {       
@@ -76,8 +76,9 @@ var nginxConfigurationHelper = function (NginxConfigJson) {
     }   
     
     this.GetNginxFullConfig = function () {
-        return this.GetNginxInputApplicationConfig() + "\n" + this.GetNginxEncodedApplicationConfig() + "\n" + this.GetNginxControllerConfiguration() + "\n";
+        return this.GetNginxEncodedConfiguration() + "\n" + this.GetNNginxControllerConfiguration() + "\n" + this.GetNginxBroadcastConfiguration() + "\n";
     }
+    return this;
 }
 
 
@@ -90,7 +91,8 @@ var NginxHelper = {
         return "on_"
     },
     FakeItForNow : function (faked) {
-        this.GenerateNginxConfigCommands(faked);
+       
+      
     },
     GetFFMPEGCommandText : function (inputSource, EncodingSetting, ouputSource) {
         var FFMPEGCommand = {
@@ -112,7 +114,7 @@ var NginxHelper = {
         FFMPEGCommand.framerate = EncodingSetting.Framerate;
         FFMPEGCommand.outputLocation = ouputSource;
         
-        return "exec ffmpeg -i " + FFMPEGCommand.inputSource + " -vcodec " + FFMPEGCommand.codec + " -preset " + FFMPEGCommand.preset + " -b:v " + FFMPEGCommand.bitrate + " -maxrate " + FFMPEGCommand.bitrate + " -bufsize " + FFMPEGCommand.bitrate + " -s  " + FFMPEGCommand.outputRes + " -r " + FFMPEGCommand.framerate + " -acodec " + FFMPEGCommand.audioCodec + " -f " + FFMPEGCommand.format + " " + FFMPEGCommand.outputLocation;
+        return "\texec ffmpeg -i " + FFMPEGCommand.inputSource + " -vcodec " + FFMPEGCommand.codec + " -preset " + FFMPEGCommand.preset + " -b:v " + FFMPEGCommand.bitrate + " -maxrate " + FFMPEGCommand.bitrate + " -bufsize " + FFMPEGCommand.bitrate + " -s  " + FFMPEGCommand.outputRes + " -r " + FFMPEGCommand.framerate + " -acodec " + FFMPEGCommand.audioCodec + " -f " + FFMPEGCommand.format + " " + FFMPEGCommand.outputLocation;
     
    
     },
@@ -125,7 +127,7 @@ var NginxHelper = {
 
         for (var i = 0; i < InputOuputConfigurations.length; i++) {
             var InputOuput = InputOuputConfigurations[i];
-            console.log(InputOuput);
+            //console.log(InputOuput);
             
             rObj.NginxEncoderCommandList.push(this.GetFFMPEGCommandText(InputOuput.InputStream, InputOuput.EncoderSettings, InputOuput.OutputStream));
             rObj.NginxBroadcastControllerCommandList.push(this.GeneratePushRelay(InputOuput.EncoderSettings));
@@ -136,9 +138,9 @@ var NginxHelper = {
            
         }
       
-        console.log(rObj);
+       
         
-        return ReturnObject;
+        return rObj;
 
     },
     GeneratePushRelay : function (EncodingSetting) {
@@ -155,7 +157,7 @@ var NginxHelper = {
     GenerateLiveRelay : function (ThirdPartySettings, EncodingSetting, LiveRelay) {
         
         for (var l = 0; l < ThirdPartySettings.length; l++) {
-            var temp = "    push " + ThirdPartySettings[l].RemoteRTMPURL + " live=1 name=" + this.GetEncodingShortHand(EncodingSetting);
+            var temp = "\tpush " + ThirdPartySettings[l].RemoteRTMPURL + " live=1 name=golive_" + this.GetEncodingShortHand(EncodingSetting) + ";";
             console.log("live relay temp");
             console.log(temp);
             LiveRelay.push(temp);
@@ -172,7 +174,12 @@ var NginxHelper = {
 
 };
 
-
+exports.ShowConfig = function (req, res) {
+    var that = NginxHelper
+    var blah = nginxConfigurationHelper(NginxConfiguration(that.GenerateNginxConfigCommands(streamRouterController.InputOutputConfigurationHelper.GetInputOutputConfiguration()))).GetNginxFullConfig();
+    streamManage.WriteFile("NginxConfig.txt", blah, false);
+    res.send(blah);
+};
 exports.NginxHelper = NginxHelper;
 
 /*

@@ -5,7 +5,7 @@
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
     <Name>ExpressApp1</Name>
     <RootNamespace>ExpressApp1</RootNamespace>
-    <LaunchUrl>http://localhost:1337/streamrouter</LaunchUrl>
+    <LaunchUrl>http://localhost:1337/ShowConfig</LaunchUrl>
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -49,6 +49,7 @@
     <Content Include="package.json" />
     <Content Include="public\stylesheets\style.styl" />
     <Content Include="README.md" />
+    <Content Include="twopc.dockerfile" />
     <Content Include="views\encodersettings.jade" />
     <Content Include="views\head.jade" />
     <Content Include="views\navbar.jade" />

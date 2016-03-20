@@ -31,7 +31,7 @@ streamManage = require('./NginxHelper/streamManage');
 //var dumb = require("./NginxHelper/FFMPEGOptionsToCommand");
 
 
-var streamRouterController = require('./routes/StreamRouterController');
+streamRouterController = require('./routes/StreamRouterController');
 var nginxController = require('./NginxHelper/NGINXConfiguration');
 
 var app = express();
@@ -100,6 +100,7 @@ app.get('/streamrouter/Delete', streamRouterController.Delete);
 app.post('/streamManage', streamManage.setStreamStatus);
 app.get('/streamManage', streamManage.streamManage);
 
+app.get('/ShowConfig', nginxController.ShowConfig);
 app.get('/FFMPEGOptions', function (request, response) {
     response.json(JSON.parse(streamManage.ReadFile(configInfo.FFMPEGOptionsFileName)));
 });
@@ -137,9 +138,7 @@ app.post('/ThirdPartyConfigurations', function (request, response) {
 
 
 app.post('/ThirdPartyConfigurations', function (request, response) {
-    
-    console.log(request.body);
-    
+   
     var newThirdPartyConfiguration = {
         StreamKey : request.body.StreamKey,
         RemoteRTMPURL : request.body.RemoteRTMPURL
@@ -150,7 +149,7 @@ app.post('/ThirdPartyConfigurations', function (request, response) {
 });
 
 
-nginxController.NginxHelper.FakeItForNow(streamRouterController.InputOutputConfigurationHelper.GetInputOutputConfiguration());
+//nginxController.NginxHelper.FakeItForNow();
 
 
 
@@ -279,8 +278,8 @@ application broadcastcontroller {
     push rtmp://localhost:1935/broadcast/golive_LocalStreamName2 name=on_LocalStreamName2 live=1;
 }
 application broadcast {
- live on;
-    push rtmp://ServiceURL1 live=1 name=golive_LocalStreamName1;
+    live on;
+    push rtmp://  live=1 name=golive_LocalStreamName1;
     push rtmp://ServiceURL2 live=1 name=golive_LocalStreamName2;
     push rtmp://ServiceURL3 live=1 name=golive_LocalStreamName2;
     

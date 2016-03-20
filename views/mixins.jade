@@ -55,7 +55,7 @@ mixin CreateFormItemForTable(FormParentID, FormItemName, Value)
     
 
 mixin CreateFormRowEncoder(FormParentID,encoderSetting)   
-    form(name="settingsForm#{FormParentID}", action='encoderSettings/edit?ID=#{FormParentID}'   method="post")
+   
         tr                           
             td                         
                 +CreateFormItemForTable(FormParentID,"Bitrate",encoderSetting.Bitrate)

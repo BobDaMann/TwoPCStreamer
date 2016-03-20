@@ -30,6 +30,7 @@ var StreamRouterHelper = {
 
 }
 var InputOutputConfigurationHelper = {
+    DefaultBroadcastControllerName : "broadcastcontroller",
     FileNameOnDisk  : "InputOutputConfiguration.json",
     DefaultEncodingControllerName : "EncodingController",
     DefaultNGINXServerInfo : "rtmp://localhost:1935/",
@@ -113,7 +114,7 @@ var InputOutputConfigurationHelper = {
     UpdateInputOuputConfigurationThirdParty : function (ThirdPartySettings) {
         var currentSettings = this.GetInputOutputConfiguration();
         var tempThirdParty = [];
-        console.log(ThirdPartySettings);
+       
         for (var c = 0; c < currentSettings.length; c++) {
             currentSettings[c].ThirdPartySettings = [];
             for (var t = 0; t < ThirdPartySettings.length; t++) {
@@ -163,7 +164,7 @@ var InputOutputConfigurationHelper = {
     
     BuildOutputStreamRTMPURL : function (EncodingSettings) {
         var outputString = EncodingSettings.Bitrate + "_" + EncodingSettings.OutputResolution + "_" + EncodingSettings.Framerate;
-        return this.DefaultNGINXServerInfo + this.DefaultEncodingControllerName + '/' + outputString;
+        return this.DefaultNGINXServerInfo + this.DefaultBroadcastControllerName + '/' + outputString +  ";";
     }
 }
 
@@ -184,26 +185,25 @@ exports.GetAvailableInputsOutputsAndEncoders = function (req, res) {
 }
 
 exports.Add = function (req, res) {
-    InputOutputConfiguration.AddInputOuputConfiguration();
+    InputOutputConfigurationHelper.AddInputOuputConfiguration();
     res.redirect("/streamrouter");
 }
 
-exports.Update = function (req, res) {
-    
-    InputOutputConfiguration.UpdateInputOutputConfiguration(InputOutputConfiguration.ParseBody(req.body));
+exports.Update = function (req, res) {   
+    InputOutputConfigurationHelper.UpdateInputOutputConfiguration(InputOutputConfigurationHelper.ParseBody(req.body));
     res.redirect("/streamrouter");
 }
 
 exports.UpdateThird = function (req, res) {
-    InputOutputConfiguration.UpdateInputOuputConfigurationThirdParty(InputOutputConfiguration.ParseBodyThird(req.body));
+    InputOutputConfigurationHelper.UpdateInputOuputConfigurationThirdParty(InputOutputConfigurationHelper.ParseBodyThird(req.body));
     res.redirect("/streamrouter");
 }
 
 exports.Delete = function (req, res) {
     
     var ID = req.param('ID');
-    InputOutputConfiguration.DeleteInputOutputConfiguration(ID);
-   
+    InputOutputConfigurationHelper.DeleteInputOutputConfiguration(ID);
+    res.redirect("/streamrouter");
 
 }
 
