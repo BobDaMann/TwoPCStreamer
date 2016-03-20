@@ -113,8 +113,9 @@ RUN DIR="$(mktemp -d)" && cd "${DIR}" && \
 RUN apt-get purge -y --auto-remove ${BUILDDEPS} && \
     rm -rf /tmp/*
 
-COPY . /restreamer
-WORKDIR /restreamer
+#COPY . /restreamer
+ADD https://raw.githubusercontent.com/BobDaMann/TwoPCStreamer/master/package.json /twoPC
+WORKDIR /twoPC
 
 RUN npm install -g bower grunt grunt-cli nodemon public-ip eslint && \
     npm install && \
@@ -129,4 +130,4 @@ ENV RS_PASSWORD datarhei
 EXPOSE 8080
 VOLUME ["/restreamer/db"]
 
-CMD ["./run.sh"]
+#CMD ["./run.sh"]
