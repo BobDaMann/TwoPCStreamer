@@ -114,7 +114,7 @@ RUN apt-get purge -y --auto-remove ${BUILDDEPS} && \
     rm -rf /tmp/*
 
 #COPY . /restreamer
-ADD https://raw.githubusercontent.com/BobDaMann/TwoPCStreamer/master/package.json /twoPC
+ADD https://raw.githubusercontent.com/BobDaMann/TwoPCStreamer/master/package.json /twoPC/package.json
 WORKDIR /twoPC
 
 RUN npm install -g bower grunt grunt-cli nodemon public-ip eslint && \
