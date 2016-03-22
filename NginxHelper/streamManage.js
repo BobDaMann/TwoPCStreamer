@@ -4,8 +4,11 @@ var os = require("os");
 
 var configInfo = require(".//config.json");
 
-configInfo.rootDirectory = os.homedir();
 
+configInfo.rootDirectory = os.homedir();
+if (configInfo.rootDirectory == "/root") {
+    configInfo.rootDirectory = "/twoPC"
+}
 
 console.log(configInfo.rootDirectory);
 
