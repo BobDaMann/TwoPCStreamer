@@ -6,9 +6,14 @@ var EncoderSettingsHelper = {
     DefaultEncoderSettings : { ID: 1, Bitrate: '3000k' , Framerate : '30' , OutputResolution : '1280x720', Preset : 'slower' },
     AddEncoderSetting : function () {
         var currentSettings = this.GetEncoderSettings();
+        console.log("Current Settings ");
+        console.log(currentSettings);
         this.DefaultEncoderSettings.ID = currentSettings.length + 1;
+        console.log("DefaultEncoderSettings inside AddEncoderSetting");
+        console.log(this.DefaultEncoderSettings);
         currentSettings.encoderSettings.push(this.DefaultEncoderSettings);
         this.WriteToDisk(currentSettings);
+
         return currentSettings;
     },
     GetEncoderSettingsByID : function (ID) {
