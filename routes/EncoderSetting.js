@@ -3,7 +3,7 @@
 var streamManage = require('../NginxHelper/streamManage');
 var EncoderSettingsHelper = {
     FileNameOnDisk : "EncodingSetting.json",
-    DefaultEncoderSettings : { ID: "", Bitrate: '3000k' , Framerate : '30' , OutputResolution : '1280x720', Preset : 'slower' },
+    DefaultEncoderSettings : { ID: 1, Bitrate: '3000k' , Framerate : '30' , OutputResolution : '1280x720', Preset : 'slower' },
     AddEncoderSetting : function () {
         var currentSettings = this.GetEncoderSettings();
         this.DefaultEncoderSettings.ID = currentSettings.length + 1;
@@ -54,6 +54,8 @@ var EncoderSettingsHelper = {
      
     },
     WriteToDisk : function (EncoderSettings) {
+        console.log("Write To Disk : Encoder Settings ");
+        console.log(EncoderSettings);
         streamManage.WriteFile(this.FileNameOnDisk, EncoderSettings, true);
     },
     ParseBody : function (requestBody, _ID) {

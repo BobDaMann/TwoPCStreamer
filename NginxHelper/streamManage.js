@@ -24,6 +24,7 @@ exports.WriteFile = function (fileNameToWrite, fileContents, isJSON) {
         }
 
     });
+    console.log("Done Writing To Disk from stream manage");
 };
 
 
