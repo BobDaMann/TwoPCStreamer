@@ -7,7 +7,7 @@ var configInfo = require(".//config.json");
 
 configInfo.rootDirectory = os.homedir();
 if (configInfo.rootDirectory == "/root") {
-    configInfo.rootDirectory = "/twoPC"
+    configInfo.rootDirectory = "/restreamer/db"
 }
 
 console.log(configInfo.rootDirectory);
